@@ -8,9 +8,7 @@
 #define PARTIDA 1
 
 #define lamda 5 //taxa de chegada
-// #define RAND_MAX 1 
-#define MAX_s 50 //nº de samples
-// teste
+#define MAX_samp 100 //nº de samples
 
 int main(void)
 {
@@ -26,14 +24,14 @@ int main(void)
 
 	// histogram array:
 	int *histogram = malloc(intervals * sizeof(int));
-	for (int k = 0; k < intervals; k++) histogram[k] = 0;
+	for (int k = 0; k <= intervals; k++) histogram[k] = 0;
 
 	int sample = 0;
-	//srand(time(NULL));
+	srand(time(NULL));
 
-	while (sample < MAX_s){
-		sample++;
-		double c = -log((double)rand() / (double)((unsigned)RAND_MAX + 1))/lamda;
+	while (sample < MAX_samp){
+		double u = (double)rand() / (double)((unsigned)RAND_MAX + 1);
+		double c = -log(u)/lamda;
 
 		//RETIRA O EVENTO DA LISTA
 		if (event_list != NULL) {
@@ -42,16 +40,19 @@ int main(void)
 			event_list = __remove(event_list);
 		}
 
-		int i = (int)(c / delta);      
-    	if (i >= intervals-1) i = intervals-1;
+		int i = (int)(c /delta);   
+    	if (i >= intervals) i = intervals;
+
     	histogram[i]++;
 
 		event_list = __add(event_list, CHEGADA, c+ev_time); //adiciona o evento à lista
 
 		c_t = c_t + c;
+
+		sample++;
 	}
 
-	double E_c = c_t/MAX_s;
+	double E_c = c_t/MAX_samp;
     printf("E[c] = %f\n", E_c);
     
     for (int j = 0; j < intervals + 1; j++) {
