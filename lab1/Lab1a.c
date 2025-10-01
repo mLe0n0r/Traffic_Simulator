@@ -10,7 +10,7 @@
 #define lamda 5 //taxa de chegada
 // #define RAND_MAX 1 
 #define MAX_s 50 //nº de samples
-
+// teste
 
 int main(void)
 {
