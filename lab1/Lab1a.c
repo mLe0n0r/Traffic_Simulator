@@ -7,7 +7,7 @@
 #define CHEGADA 0 //tipo de evento (no struct)
 #define PARTIDA 1
 
-#define lamda 5 //taxa de chegada
+#define lambda 5 //taxa de chegada
 #define MAX_samp 100 //nº de samples
 
 int main(void)
@@ -18,8 +18,8 @@ int main(void)
 	event_list = NULL;
 	
 	double c_t = 0; //para calcular a média de c
-	double max = 5.0/lamda; //nº max de valores representaveis 
-	double delta = 1.0/(5.0*lamda); 
+	double max = 5.0/lambda; //nº max de valores representaveis 
+	double delta = 1.0/(5.0*lambda); 
 	int intervals = (int)(max/delta);
 
 	// histogram array:
@@ -31,7 +31,7 @@ int main(void)
 
 	while (sample < MAX_samp){
 		double u = (double)rand() / (double)((unsigned)RAND_MAX + 1);
-		double c = -log(u)/lamda;
+		double c = -log(u)/lambda;
 
 		//RETIRA O EVENTO DA LISTA
 		if (event_list != NULL) {
@@ -40,22 +40,21 @@ int main(void)
 			event_list = __remove(event_list);
 		}
 
-		int i = (int)(c /delta);   
+		int i = (int)(c/delta);   
     	if (i >= intervals) i = intervals;
 
     	histogram[i]++;
 
-		event_list = __add(event_list, CHEGADA, c+ev_time); //adiciona o evento à lista
+		event_list = __add(event_list, CHEGADA, c + ev_time); //adiciona o evento à lista
 
 		c_t = c_t + c;
-
 		sample++;
 	}
 
 	double E_c = c_t/MAX_samp;
     printf("E[c] = %f\n", E_c);
     
-    for (int j = 0; j < intervals + 1; j++) {
+    for (int j = 0; j <= intervals; j++) {
         printf("histogram[%d] = %d\n", j, histogram[j]);
     }
 }

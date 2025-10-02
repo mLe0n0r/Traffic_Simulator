@@ -20,7 +20,7 @@ list * __add (list * pointer, int n_type, double n_time)
 		pointer = (list *) malloc(sizeof (list));
 		pointer -> next = NULL;
 		pointer -> type = n_type;
-		pointer -> type = n_type;
+		pointer -> time = n_time;
 		return pointer;
 	}
 	else
