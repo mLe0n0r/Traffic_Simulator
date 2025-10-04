@@ -31,7 +31,7 @@ int main(void){
 
     // histogram array:
 	int *histogram = malloc(intervals * sizeof(int));
-	for (int k = 0; k <= intervals; k++) histogram[k] = 0;
+	for (int k = 0; k < intervals; k++) histogram[k] = 0;
 
     while (sample < MAX_samp) {
         double prob = (double)rand() / (double)((unsigned)RAND_MAX + 1);
@@ -45,9 +45,11 @@ int main(void){
             }
 
             double c = present_time - ev_time;
-
-            int i = (int)(c/delta);   
-            if (i >= intervals) i = intervals;
+            
+		    printf("c[%d] = %f\n", sample, c);
+            int i = (int)(c/delta); 
+              
+            if (i >= intervals) i = intervals -1;
 
             histogram[i]++;
             event_list = __add(event_list, CHEGADA, present_time);
@@ -61,7 +63,7 @@ int main(void){
     double E_c = c_total/MAX_samp;
     printf("E[c] = %f\n", E_c);
 
-    for (int j = 0; j <= intervals; j++) {
+    for (int j = 0; j < intervals; j++) {
         printf("histogram[%d] = %d\n", j, histogram[j]);
     }
 }

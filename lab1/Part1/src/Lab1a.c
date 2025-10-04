@@ -24,7 +24,7 @@ int main(void)
 
 	// histogram array:
 	int *histogram = malloc(intervals * sizeof(int));
-	for (int k = 0; k <= intervals; k++) histogram[k] = 0;
+	for (int k = 0; k < intervals; k++) histogram[k] = 0;
 
 	int sample = 0;
 	srand(time(NULL));
@@ -40,8 +40,9 @@ int main(void)
 			event_list = __remove(event_list);
 		}
 
-		int i = (int)(c/delta);   
-    	if (i >= intervals) i = intervals;
+		int i = (int)(c/delta);
+		   
+    	if (i >= intervals) i = intervals -1;
 
     	histogram[i]++;
 
@@ -54,7 +55,7 @@ int main(void)
 	double E_c = c_t/MAX_samp;
     printf("E[c] = %f\n", E_c);
     
-    for (int j = 0; j <= intervals; j++) {
+    for (int j = 0; j < intervals; j++) {
         printf("histogram[%d] = %d\n", j, histogram[j]);
     }
 }
