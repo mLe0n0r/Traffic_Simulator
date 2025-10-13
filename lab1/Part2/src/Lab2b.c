@@ -18,6 +18,9 @@ typedef struct
     double delay_prob;
     double avg_delay;
     double p_delay_gt_Ax;
+    double bin_width; 
+    int num_bins; 
+    int *histogram; // pointer for the histogram
 } EC_Metrics;
 
 
@@ -33,6 +36,24 @@ EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
 
     list * events_list = NULL;
 	queue_list * queue = NULL;
+
+    // ------------------- Histogram --------------------
+    double mu = 1.0 / dm;
+    double gamma = N * mu - lambda;
+
+    double max, delta;
+    if (gamma > 0) {
+        max   = 5.0 / gamma;
+        delta = 1.0 / (5.0 * gamma);
+    } else {
+        max   = 5.0 / lambda;
+        delta = 1.0 / (5.0 * lambda);
+    }
+    int intervals = (int)(max / delta);
+
+    int *histogram = malloc(intervals * sizeof(int));
+    for (int k = 0; k < intervals; k++) histogram[k] = 0;
+    // ---------------------------------------------------
 
     events_list = generate_events(lambda, dm, CHEGADA, ev_time, events_list); // first event
 
@@ -66,11 +87,17 @@ EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
                 events_list = generate_events(lambda, dm, PARTIDA, ev_time, events_list); // now that the event got out the queue we can generate a new departure
 
                 delay = ev_time - ev_arrival;
+
+                // build the histogram:
+                int i = (int)(delay/delta);
+                if (i >= intervals) i = intervals -1;
+                histogram[i]++;
+
+                // for the average delay calculation:
                 sum_delay += delay;
                 if (delay > Ax) delayed_gt_Ax++;
             }
-            else busy--;
-            
+            else busy--; 
         }
     }
 
@@ -79,8 +106,12 @@ EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
     results.avg_delay = (double)(sum_delay/arrivals);
     results.p_delay_gt_Ax = ((double)delayed_gt_Ax / (double)arrivals) * 100;
 
+    // histogram:
+    results.bin_width = delta;
+    results.num_bins = intervals;
+    results.histogram = histogram;
+
     return results;
-    
 }
 
 int main(void){
@@ -92,6 +123,12 @@ int main(void){
         printf("Delay probability: %.2f\n", result.delay_prob);
         printf("Average delay (Am): %f\n", result.avg_delay);
         printf("Probability of A > Ax: %.2f\n", result.p_delay_gt_Ax);
+        printf("Histogram of delays:\n");
+        for(int i = 0; i < result.num_bins; i++){
+            double low = i * result.bin_width;
+            double high = low + result.bin_width;
+            printf("[%.4f, %.4f[ ms : %d\n", low, high, result.histogram[i]);
+        }
         printf("\n");
     }   
 }
