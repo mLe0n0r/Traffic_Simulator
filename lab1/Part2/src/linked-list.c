@@ -70,6 +70,41 @@ void __print (list * pointer)
 	}
 }
 
+// ------------------ Queue Functions ------------------
+
+// Function that adds a new element to the list (FIFO)
+queue_list * __add_queue(queue_list* pointer, double n_time){
+	queue_list* lp = pointer;
+	queue_list* p_aux;
+
+	if(pointer == NULL)
+	{
+		pointer = (queue_list*) malloc(sizeof(queue_list));
+		pointer->next = NULL;
+		pointer->time = n_time;
+		return pointer;
+	}
+	else
+	{
+		while(pointer->next != NULL)
+			pointer = (queue_list*) pointer->next;
+
+		p_aux = (queue_list*) malloc(sizeof(queue_list));
+		p_aux->next = NULL;
+		p_aux->time = n_time;
+		pointer->next = (struct queue_list*) p_aux;
+		return lp;
+	}
+}
+
+// Function that removes the first element
+queue_list * __remove_queue(queue_list * pointer, double * arrival_time){
+	*arrival_time = pointer->time; // returns the time the event arrived at the list 
+	queue_list * lp = (queue_list *)pointer -> next;
+	free(pointer);
+	return lp;
+}
+
 // A simple example of using the functions defined above
 // int main(void)
 // {
