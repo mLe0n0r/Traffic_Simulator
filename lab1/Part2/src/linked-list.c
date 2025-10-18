@@ -71,7 +71,10 @@ void __print (list * pointer)
 }
 
 // ------------------ Queue Functions ------------------
-
+typedef struct queue_list {
+    double time;
+    struct queue_list* next;
+} queue_list;
 // Function that adds a new element to the list (FIFO)
 queue_list * __add_queue(queue_list* pointer, double n_time){
 	queue_list* lp = pointer;

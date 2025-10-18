@@ -23,6 +23,46 @@ typedef struct
     int *histogram; // pointer for the histogram
 } EC_Metrics;
 
+// ----------------- Functions to calculate the teoretical Am -----------------
+double calculate_factorial(int N) {
+    double result = 1.0;
+    for (int i = 1; i <= N; i++) {
+        result *= i;
+    }
+    return result;
+}
+
+double calculate_p_delay(double lambda, double dm, int N){
+    double A = lambda * dm;
+    double numerator = (pow(A, N) / calculate_factorial(N)) * (N / (N - A));
+    double denominator = 0.0;
+
+    for (int k = 0; k < N; k++) {
+        denominator += (pow(A, k) / calculate_factorial(k));
+    }
+    denominator += numerator;
+
+    return (double)(numerator / denominator);
+}
+
+double calculate_p_block(double lambda, double dm, int N) {
+    double A = lambda * dm;
+    double numerator = (double)(pow(A, N) / calculate_factorial(N));
+    double denominator = 0.0;
+
+    for (int k = 0; k < N; k++) {
+        denominator += (double)(pow(A, k) / calculate_factorial(k));
+    }
+    denominator += numerator;
+
+    return (double)(numerator / denominator);
+}
+
+double calculate_am(double p_delay, double lambda, double p_block) {
+    return (double)(p_delay / (lambda * (1 - p_block)));
+}
+
+// ------------------------------------------------------
 
 EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
     int busy = 0;
@@ -38,18 +78,13 @@ EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
 	queue_list * queue = NULL;
 
     // ------------------- Histogram --------------------
-    double mu = 1.0 / dm;
-    double gamma = N * mu - lambda;
-
-    double max, delta;
-    if (gamma > 0) {
-        max   = 5.0 / gamma;
-        delta = 1.0 / (5.0 * gamma);
-    } else {
-        max   = 5.0 / lambda;
-        delta = 1.0 / (5.0 * lambda);
-    }
-    int intervals = (int)(max / delta);
+    double p_delay = calculate_p_delay(lambda, dm, N);
+    double p_block = calculate_p_block(lambda, dm, N);
+    double max;
+    if(N == 1) max = 3 * 60; // for N = 1 its not possible to estimate Am due to instability
+    else max = 30 * calculate_am(p_delay, lambda, p_block); // this way the range of delays is better represented for each case 
+	int intervals = 25;
+    double delta = (double)(max/intervals);
 
     int *histogram = malloc(intervals * sizeof(int));
     for (int k = 0; k < intervals; k++) histogram[k] = 0;
@@ -89,7 +124,7 @@ EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
                 delay = ev_time - ev_arrival;
 
                 // build the histogram:
-                int i = (int)(delay/delta);
+                int i = (int)((delay)/delta);
                 if (i >= intervals) i = intervals -1;
                 histogram[i]++;
 
@@ -116,19 +151,22 @@ EC_Metrics erlang_C(int lambda, double dm, int N, int max_samps, double Ax){
 
 int main(void){
     srand(time(NULL));
-   
-    for(int N = 1; N < 7; N++){
-        EC_Metrics result = erlang_C(200, 0.008, N, 10000, 0.02);
+
+    for(int N = 1; N < 11; N++){
+        EC_Metrics result = erlang_C(200, 0.008, N, 100000, 0.008);
         printf("Metric when having %d services:\n", N);
         printf("Delay probability: %.2f\n", result.delay_prob);
-        printf("Average delay (Am): %f\n", result.avg_delay);
+        printf("Average delay (Am): %f ms\n", result.avg_delay);
         printf("Probability of A > Ax: %.2f\n", result.p_delay_gt_Ax);
-        printf("Histogram of delays:\n");
-        for(int i = 0; i < result.num_bins; i++){
-            double low = i * result.bin_width;
-            double high = low + result.bin_width;
-            printf("[%.4f, %.4f[ ms : %d\n", low, high, result.histogram[i]);
+        if(N < 7){
+            printf("Histogram of delays:\n");
+            for(int i = 0; i < result.num_bins; i++){
+                double low = i * result.bin_width;
+                double high = low + result.bin_width;
+                printf("[%.3f, %.3f[ ms : %d\n", low, high, result.histogram[i]);
+            }
         }
+        
         printf("\n");
     }   
 }
