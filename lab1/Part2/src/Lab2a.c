@@ -51,7 +51,7 @@ int main(void) // Earlang-B distribution
 {
     srand(time(NULL));
 
-    for(int N = 1; N < 6; N++){
+    for(int N = 1; N < 11; N++){
         double prob = erlang_B(200, 0.008, N, 10000);
         printf("Blocking probability when having %d services: %.2f\n", N, prob);
     }   
