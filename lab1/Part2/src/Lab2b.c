@@ -155,16 +155,29 @@ int main(void){
     for(int N = 1; N < 11; N++){
         EC_Metrics result = erlang_C(200, 0.008, N, 100000, 0.008);
         printf("Metric when having %d services:\n", N);
-        printf("Delay probability: %.2f\n", result.delay_prob);
-        printf("Average delay (Am): %f ms\n", result.avg_delay);
-        printf("Probability of A > Ax: %.2f\n", result.p_delay_gt_Ax);
+        printf("Delay probability: %.2f %%\n", result.delay_prob);
+
+        if(N == 1) printf("Average delay (Am): %f ms\n", result.avg_delay);
+        else printf("Average delay (Am): %f us\n", result.avg_delay * 1000);
+
+        printf("Probability of A > Ax: %.2f %%\n", result.p_delay_gt_Ax);
         if(N < 7){
             printf("Histogram of delays:\n");
-            for(int i = 0; i < result.num_bins; i++){
-                double low = i * result.bin_width;
-                double high = low + result.bin_width;
-                printf("[%.3f, %.3f[ ms : %d\n", low, high, result.histogram[i]);
+            if(N == 1) {
+                for(int i = 0; i < result.num_bins; i++){
+                    double low = i * result.bin_width;
+                    double high = low + result.bin_width;
+                    printf("[%.3f, %.3f[ ms : %d\n", low, high, result.histogram[i]);
+                }
             }
+            else{
+                for(int i = 0; i < result.num_bins; i++){
+                double low = i * result.bin_width * 1000;
+                double high = low + result.bin_width;
+                printf("[%.3f, %.3f[ us : %d\n", low, high, result.histogram[i]);
+            }
+            }
+            
         }
         
         printf("\n");
