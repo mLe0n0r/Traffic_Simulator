@@ -35,6 +35,8 @@ int main(void)
 	int qeue_type; 
 	double qeue_time = 0;
 
+	double c_d = 0;
+
 	// histogram array:
 	int *histogram = malloc(intervals * sizeof(int));
 	for (int k = 0; k < intervals; k++) histogram[k] = 0;
@@ -45,7 +47,7 @@ int main(void)
 	while (sample < MAX_samp){
 		//GERO EVENTO DE CHEGADA
 		double u_a = (double)rand() / (double)((unsigned)RAND_MAX + 1);
-		double c_a = -log(u)/lambda;
+		double c_a = -log(u_a)/lambda;
 
 		//RETIRA O EVENTO DA LISTA
 		if (event_list != NULL && c_d <= c_t) {
@@ -55,7 +57,7 @@ int main(void)
 			count_rec--;
 		}
 
-		int i = (int)(c/delta);
+		int i = (int)(c_a/delta);
 		   
     	if (i >= intervals) i = intervals -1;
 
@@ -65,7 +67,7 @@ int main(void)
 		if(count_rec < receivers){
 			//SE HOUVER RECETORES LIVRES GERO EVENTO DE PARTIDA
 			double u_d = (double)rand() / (double)((unsigned)RAND_MAX + 1);
-			double c_d = -log(u)/lambda;
+			c_d = -log(u_d)/lambda;
 			count_rec++;
 
 			if(count_qeue==0){
@@ -86,7 +88,7 @@ int main(void)
 			//Verifica se há lugares na fila disponiveis
 			if(count_qeue < qeue){
 				count_qeue++;
-				qeue_list = __add(qeue_list, CHEGADA, c + c_a);
+				qeue_list = __add(qeue_list, CHEGADA, c_t + c_a);
 			}
 			else{
 				block++;
