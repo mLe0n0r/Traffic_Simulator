@@ -172,38 +172,37 @@ EC_Metrics general_case(int lambda, double dm, int N, int max_samps, double Ax, 
 int main(void){
     srand(time(NULL));
 
-    // // Confirming that the general case with length = 0 is equal to the erlang B:
-    // printf("Blocking Probability with L = 0:\n");
-    // for(int N = 1; N < 11; N++){
-    //     EC_Metrics result = general_case(lambda, dm, N, num_events, Ax, 0);
-    //     printf("%d services: %.2f %%\n", N, result.blocking_prob);
-    // }
+    // Confirming that the general case with length = 0 is equal to the erlang B:
+    printf("Blocking Probability with L = 0:\n");
+    for(int N = 1; N < 11; N++){
+        EC_Metrics result = general_case(lambda, dm, N, num_events, Ax, 0);
+        printf("%d services: %.2f %%\n", N, result.blocking_prob);
+    }
 
-    // // Confirming that the general case with length = ∞ is equal to the erlang C:
-    // printf("Results with L = 100000:\n");
-    // for(int N = 1; N < 11; N++){
-    //     EC_Metrics result = general_case(lambda, dm, N, num_events, Ax, 100000);
-    //     printf("Metric when having %d services:\n", N);
-    //     printf("Delay probability: %.2f %%\n", result.delay_prob);
+    // Confirming that the general case with length = ∞ is equal to the erlang C:
+    printf("Results with L = 100000:\n");
+    for(int N = 1; N < 11; N++){
+        EC_Metrics result = general_case(lambda, dm, N, num_events, Ax, 100000);
+        printf("Metric when having %d services:\n", N);
+        printf("Delay probability: %.2f %%\n", result.delay_prob);
 
-    //     if(N == 1) printf("Average delay (Am): %f ms\n", result.avg_delay);
-    //     else printf("Average delay (Am): %f us\n", result.avg_delay * 1000);
+        if(N == 1) printf("Average delay (Am): %f ms\n", result.avg_delay);
+        else printf("Average delay (Am): %f us\n", result.avg_delay * 1000);
 
-    //     printf("Probability of A >  %.3f: %.2f %%\n", Ax, result.p_delay_gt_Ax);
-    //     printf("\n");
-    // }
+        printf("Probability of A >  %.3f: %.2f %%\n", Ax, result.p_delay_gt_Ax);
+        printf("\n");
+    }
 
-    // // General case for different queue lengths:
-    // for (int length = 1; length < 38; length += 2){
-    //     EC_Metrics result = general_case(lambda, dm, 1, num_events, Ax, length);
-    //     printf("Results for a queue of length = %d\n", length);
-    //     printf("Delay probability: %.2f %%\n", result.delay_prob);
-    //     printf("Blocking Probability: %.2f %%\n", result.blocking_prob);
-    //     printf("Probability of A > %.3f: %.2f %%\n", Ax, result.p_delay_gt_Ax);
-    //     printf("Average delay (Am): %f ms\n", result.avg_delay);
-    //     printf("\n");
-    // }
-
+    // General case for different queue lengths:
+    for (int length = 1; length < 38; length += 2){
+        EC_Metrics result = general_case(lambda, dm, 1, num_events, Ax, length);
+        printf("Results for a queue of length = %d\n", length);
+        printf("Delay probability: %.2f %%\n", result.delay_prob);
+        printf("Blocking Probability: %.2f %%\n", result.blocking_prob);
+        printf("Probability of A > %.3f: %.2f %%\n", Ax, result.p_delay_gt_Ax);
+        printf("Average delay (Am): %f ms\n", result.avg_delay);
+        printf("\n");
+    }
 
     // Detect the necessary length to obtain 1% of blocking probability:
     for (int N = 2; N < 7; N++){
