@@ -190,6 +190,23 @@ int main(void){
         else printf("Average delay (Am): %f us\n", result.avg_delay * 1000);
 
         printf("Probability of A >  %.3f: %.2f %%\n", Ax, result.p_delay_gt_Ax);
+        if(N < 7){
+            printf("Histogram of delays:\n");
+            if(N == 1) {
+                for(int i = 0; i < result.num_bins; i++){
+                    double low = i * result.bin_width;
+                    double high = low + result.bin_width;
+                    printf("[%.3f, %.3f[ ms : %d\n", low, high, result.histogram[i]);
+                }
+            }
+            else{
+                for(int i = 0; i < result.num_bins; i++){
+                double low = i * result.bin_width * 1000;
+                double high = low + result.bin_width;
+                printf("[%.3f, %.3f[ us : %d\n", low, high, result.histogram[i]);
+                }
+            } 
+        }
         printf("\n");
     }
 
@@ -218,5 +235,4 @@ int main(void){
         printf("Blocking Probability: %.2f%%\n", result.blocking_prob);
         printf("\n");
     }
-
 }
