@@ -1,0 +1,66 @@
+Blocking Probability with L = 0:              Blocking Probability obtain with Erlang B:
+1 service: 61.79 %                            61.98 %
+2 services: 33.39 %                           32.78 %
+3 services: 15.08 %                           15.73 %
+4 services: 5.68 %                            5.01 %
+5 services: 1.74 %                            1.56 %
+6 services: 0.45 %                            0.40 % 
+7 services: 0.11 %                            0.06 %
+8 services: 0.02 %                            0.03 %
+9 services: 0.00 %                            0.00 %
+10 services: 0.00 %                           0.00 %
+
+# =============================================================================
+
+Results with L = 100000:                      Results obtain with Erlang C:
+
+Metric when having 1 services:                Metric when having 1 services:
+Delay probability: 100.00 %                   Delay probability: 100.00 %
+Average delay (Am): 58.084255 ms              Average delay (Am): 58.301414 ms
+Probability of A > Ax: 62.53 %                Probability of A > Ax: 62.57 %
+
+Metric when having 2 services:                Metric when having 2 services:
+Delay probability: 70.51 %                    Delay probability: 71.50 %
+Average delay (Am): 14.900037 us              Average delay (Am): 14.426997 us
+Probability of A > Ax: 47.38 %                Probability of A > Ax: 48.55 %
+
+Metric when having 3 services:                Metric when having 3 services:
+Delay probability: 26.68 %                    Delay probability: 27.53 %
+Average delay (Am): 1.486446 us               Average delay (Am): 1.563757 us
+Probability of A > Ax: 6.39 %                 Probability of A > Ax: 6.82 %
+
+Metric when having 4 services:                Metric when having 4 services:
+Delay probability: 9.04 %                     Delay probability: 8.88 %
+Average delay (Am): 0.305545 us               Average delay (Am): 0.292418 us
+Probability of A > Ax: 0.87 %                 Probability of A > Ax: 0.78 %
+
+Metric when having 5 services:                Metric when having 5 services: 
+Delay probability: 2.43 %                     Delay probability: 2.38 %
+Average delay (Am): 0.054439 us               Average delay (Am): 0.054596 us
+Probability of A > Ax: 0.06 %                 Probability of A > Ax: 0.07 %
+
+Metric when having 6 services:                Metric when having 6 services:
+Delay probability: 0.53 %                     Delay probability: 0.58 %
+Average delay (Am): 0.008096 us               Average delay (Am): 0.010254 us
+Probability of A > Ax: 0.00 %                 Probability of A > Ax: 0.00 %
+
+Metric when having 7 services:                Metric when having 7 services:
+Delay probability: 0.16 %                     Delay probability: 0.11 %
+Average delay (Am): 0.002818 us               Average delay (Am): 0.001370 us
+Probability of A > Ax: 0.00 %                 Probability of A > Ax: 0.00 %
+
+Metric when having 8 services:                Metric when having 8 services:
+Delay probability: 0.04 %                     Delay probability: 0.03 %
+Average delay (Am): 0.000399 us               Average delay (Am): 0.000358 us
+Probability of A > Ax: 0.00 %                 Probability of A > Ax: 0.00 %
+
+Metric when having 9 services:                Metric when having 9 services:
+Delay probability: 0.01 %                     Delay probability: 0.00 %
+Average delay (Am): 0.000082 us               Average delay (Am): 0.000028 us
+Probability of A > Ax: 0.00 %                 Probability of A > Ax: 0.00 %
+
+Metric when having 10 services:               Metric when having 10 services:
+Delay probability: 0.00 %                     Delay probability: 0.00 %
+Average delay (Am): 0.000000 us               Average delay (Am): 0.000000 us
+Probability of A > Ax: 0.00 %                 Probability of A > Ax: 0.00 %
+

@@ -1,0 +1,17 @@
+Queue length requirements for 1% Blocking Probability:
+
+2 services:
+Queue length: 12
+Blocking Probability: 0.98%
+
+3 services:
+Queue length: 5
+Blocking Probability: 0.57%
+
+4 services:
+Queue length: 2
+Blocking Probability: 0.89%
+
+5 services:
+Queue length: 1
+Blocking Probability: 0.56%
