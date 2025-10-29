@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "linked-list.h"
 
 // Function prototypes
-list* generate_events(double lambda, double dm, int event_typ, double event_time, list *list);
+list* generate_events(double lambda, double event_time, list *list);
 
 #endif
