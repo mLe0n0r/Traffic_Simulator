@@ -7,23 +7,15 @@
 #define CHEGADA 0
 #define PARTIDA 1
 
-list* generate_events(double lambda, double dm, int event_typ, double event_time, list *list)
+list* generate_events(double lambda, double event_time, list *list)
 {
     double max = 5.0 / lambda;
     double delta = 1.0 / (5.0 * lambda);
 
-    if(event_typ == CHEGADA){
-        double u = (rand() + 1.0) / (RAND_MAX + 2.0); 
-        double c = -log(u) / lambda;
+    double u = (rand() + 1.0) / (RAND_MAX + 2.0); 
+    double c = -log(u) / lambda;
 
-        list = __add(list, event_typ, c + event_time); // adiciona novo evento
-    } 
-
-    else{
-        double u = (rand() + 1.0) / (RAND_MAX + 2.0);
-        double d = -dm * log(u);
-        list = __add(list, event_typ, d + event_time);  
-    }
+    list = __add(list, 0, c + event_time); // adiciona novo evento
  
     return list;
 }
