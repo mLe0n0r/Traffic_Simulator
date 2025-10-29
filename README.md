@@ -7,6 +7,12 @@ lab1/
      ├─ src/            → source files (.c): Lab1a.c, Lab1b.c, linked-list.c
      └─ build/          → recommended folder to compile and store executables
                           (contains an optional Makefile)
+ └─ Part2/
+     ├─ include/        → header files (.h)
+     ├─ src/            → source files (.c): Lab2a.c, Lab2b.c, Lab2c.c, linked-list.c, generate_events.c
+     ├─ build/
+     ├─ Results/        → results obtained during simulation (.txt)
+     └─ plots/          → graphs created from the results obtained for a better visualization
 ```
 
 ---
@@ -14,11 +20,12 @@ lab1/
 ## ▶️ How to Compile
 
 ```
-cd Lab1/Part1/build
 
-gcc -I../include ../src/Lab1b.c ../src/linked-list.c -o lab1.exe
+cd Lab2/Part2/build
 
-.\lab1.exe
+gcc -I../include ../src/Lab2c.c ../src/linked-list.c ../src/generate_events.c -o generalCase.exe
+
+./generalCase.exe
 ```
 
 ---
