@@ -3,7 +3,7 @@
 #include<math.h> 
 #include<time.h>
 
-double call_duration(int type){
+double call_duration(int type, int operator_type){
     if(type == 0){ // is a general-purpose call
         double min_duration = 60.0;  // seconds
         double max_duration = 300.0; // max duration = 5 min
@@ -18,7 +18,7 @@ double call_duration(int type){
         else return max_duration; 
     }
 
-    else { // is area-specific
+    else if(type == 1 && operator_type == 0) { // is area-specific 
         int min_duration = 30;
         int max_duration = 120;
 
@@ -38,5 +38,15 @@ double call_duration(int type){
         }
         return duration;
     }
-}
 
+    else{ // is area-specific and has been answered by a are-specific
+        double min_duration = 60.0; 
+        double exp_duration = 0;
+
+        double u = (rand() + 1.0) / (RAND_MAX + 2.0); 
+        double x = - 150.0 * log(u);
+
+        double duration = min_duration + x;
+        return duration;
+    }
+}

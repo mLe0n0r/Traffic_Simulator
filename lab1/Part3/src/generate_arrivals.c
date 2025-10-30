@@ -6,6 +6,8 @@
 
 #define CHEGADA 0
 #define PARTIDA 1
+#define GENERAL 0
+#define SPECIFIC 1
 
 list* generate_events(double lambda, double event_time, list *list)
 {
@@ -15,15 +17,8 @@ list* generate_events(double lambda, double event_time, list *list)
     double u = (rand() + 1.0) / (RAND_MAX + 2.0); 
     double c = -log(u) / lambda;
 
-    list = __add(list, 0, c + event_time); // adiciona novo evento
+    if (u < 0.3) list = __add(list, CHEGADA, GENERAL, c + event_time); // adiciona novo evento
+    else list = __add(list, CHEGADA, SPECIFIC, c + event_time);
  
     return list;
 }
-
-// int main(void)
-// {
-//     srand(time(NULL));
-//     list  * event_list = NULL;
-//     event_list = generate_events(5, 0.008, CHEGADA, 0, event_list);
-//     printf("%f\n", event_list->time);
-// }
