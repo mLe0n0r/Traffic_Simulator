@@ -5,6 +5,6 @@
 #include <stdlib.h>
 
 // Function prototypes
-double call_duration(int type);
+double call_duration(int type, int operator_type);
 
 #endif

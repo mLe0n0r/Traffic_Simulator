@@ -11,7 +11,7 @@ list * __remove (list * pointer)
 }
 
 // Function that adds a new element to the list, sorting the list in chronological order
-list * __add (list * pointer, int n_type, double n_time)
+list * __add (list * pointer, int n_type, int n_purpose, double n_time)
 {
 	list * lp = pointer;
 	list * p_aux, * p_next;
@@ -20,6 +20,7 @@ list * __add (list * pointer, int n_type, double n_time)
 		pointer = (list *) malloc(sizeof (list));
 		pointer -> next = NULL;
 		pointer -> type = n_type;
+		pointer -> purpose = n_purpose;
 		pointer -> time = n_time;
 		return pointer;
 	}
@@ -28,6 +29,7 @@ list * __add (list * pointer, int n_type, double n_time)
 		if (pointer->time > n_time) {
 	        p_aux = (list *) malloc(sizeof (list));
 	        p_aux -> type = n_type;
+			p_aux -> purpose = n_purpose;
             p_aux -> time = n_time;
             p_aux -> next = (struct list *) pointer;
             return p_aux;
@@ -50,6 +52,7 @@ list * __add (list * pointer, int n_type, double n_time)
 		else
 			pointer -> next = NULL;
 		pointer -> type = n_type;
+		pointer -> purpose = n_purpose;
 		pointer -> time = n_time;
 		return lp;
 	}
@@ -71,12 +74,8 @@ void __print (list * pointer)
 }
 
 // ------------------ Queue Functions ------------------
-typedef struct queue_list {
-    double time;
-    struct queue_list* next;
-} queue_list;
 // Function that adds a new element to the list (FIFO)
-queue_list * __add_queue(queue_list* pointer, double n_time){
+queue_list * __add_queue(queue_list* pointer, int n_purpose, double n_time){
 	queue_list* lp = pointer;
 	queue_list* p_aux;
 
@@ -84,6 +83,7 @@ queue_list * __add_queue(queue_list* pointer, double n_time){
 	{
 		pointer = (queue_list*) malloc(sizeof(queue_list));
 		pointer->next = NULL;
+		pointer->purpose = n_purpose;
 		pointer->time = n_time;
 		return pointer;
 	}
@@ -94,8 +94,9 @@ queue_list * __add_queue(queue_list* pointer, double n_time){
 
 		p_aux = (queue_list*) malloc(sizeof(queue_list));
 		p_aux->next = NULL;
+		p_aux->purpose = n_purpose;
 		p_aux->time = n_time;
-		pointer->next = (struct queue_list*) p_aux;
+		pointer->next = p_aux;
 		return lp;
 	}
 }
