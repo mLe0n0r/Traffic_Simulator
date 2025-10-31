@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include "linked-list.h"
+#include "linked_list.h"
 
 #define CHEGADA 0
 #define PARTIDA 1
@@ -11,14 +11,15 @@
 
 list* generate_events(double lambda, double event_time, list *list)
 {
-    double max = 5.0 / lambda;
-    double delta = 1.0 / (5.0 * lambda);
+    double u_arriv = (rand() + 1.0) / (RAND_MAX + 2.0); 
+    double c = -log(u_arriv) / lambda;
 
-    double u = (rand() + 1.0) / (RAND_MAX + 2.0); 
-    double c = -log(u) / lambda;
+    double u_type = (rand() + 1.0) / (RAND_MAX + 2.0);
+    int is_generic_only = (u_type < 0.3) ? GENERAL : SPECIFIC; // 30% only general, 70% will be transferred to the specific area
 
-    if (u < 0.3) list = __add(list, CHEGADA, GENERAL, c + event_time); // adiciona novo evento
-    else list = __add(list, CHEGADA, SPECIFIC, c + event_time);
- 
+    int enc_purpose = is_generic_only;
+
+    list = __add(list, CHEGADA, enc_purpose, c + event_time);
+
     return list;
 }

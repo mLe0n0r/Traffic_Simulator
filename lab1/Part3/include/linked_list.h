@@ -24,6 +24,6 @@ list* __add(list* pointer, int n_type, int n_purpose, double n_time);
 void __print(list* pointer);
 
 queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time);
-queue_list * __remove_queue(queue_list * pointer, double * arrival_time);
+queue_list* __remove_queue(queue_list * pointer, int *purpose, double * arrival_time);
 
 #endif
