@@ -11,7 +11,7 @@ list * __remove (list * pointer)
 }
 
 // Function that adds a new element to the list, sorting the list in chronological order
-list * __add (list * pointer, int n_type, int n_purpose, double n_time)
+list * __add (list * pointer, int n_type, int n_purpose, double n_time, double n_duration)
 {
 	list * lp = pointer;
 	list * p_aux, * p_next;
@@ -22,6 +22,7 @@ list * __add (list * pointer, int n_type, int n_purpose, double n_time)
 		pointer -> type = n_type;
 		pointer -> purpose = n_purpose;
 		pointer -> time = n_time;
+		pointer -> delay = n_duration;
 		return pointer;
 	}
 	else
@@ -31,6 +32,7 @@ list * __add (list * pointer, int n_type, int n_purpose, double n_time)
 	        p_aux -> type = n_type;
 			p_aux -> purpose = n_purpose;
             p_aux -> time = n_time;
+			p_aux -> delay = n_duration;
             p_aux -> next = (struct list *) pointer;
             return p_aux;
 	    }
@@ -54,6 +56,7 @@ list * __add (list * pointer, int n_type, int n_purpose, double n_time)
 		pointer -> type = n_type;
 		pointer -> purpose = n_purpose;
 		pointer -> time = n_time;
+		pointer -> delay = n_duration;
 		return lp;
 	}
 }
@@ -75,7 +78,7 @@ void __print (list * pointer)
 
 // ------------------ Queue Functions ------------------
 // Função de adicionar elemento na fila (FIFO), agora inclui arrival_to_general
-queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time){
+queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time, double arrivals_G){
     queue_list* lp = pointer;
     queue_list* p_aux;
     if(pointer == NULL) {
@@ -83,6 +86,7 @@ queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time){
         pointer->next = NULL;
         pointer->purpose = n_purpose;
         pointer->time = n_time;
+		pointer->arrival_to_general = arrivals_G;
         return pointer;
     } else {
         while(pointer->next != NULL)
@@ -91,14 +95,16 @@ queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time){
         p_aux->next = NULL;
         p_aux->purpose = n_purpose;
         p_aux->time = n_time;
+		p_aux->arrival_to_general = arrivals_G;
         pointer->next = p_aux;
         return lp;
     }
 }
 
 // Função de remover elemento da fila, retorna arrival_to_general pelo ponteiro
-queue_list* __remove_queue(queue_list * pointer, int *purpose, double * arrival_time){
-    *arrival_time = pointer->time;
+queue_list* __remove_queue(queue_list * pointer, int *purpose, double * arrival_S, double *arrival_G){
+    *arrival_S = pointer->time;
+	*arrival_G = pointer->arrival_to_general;
     *purpose      = pointer->purpose;
     queue_list * lp = (queue_list *)pointer -> next;
     free(pointer);
