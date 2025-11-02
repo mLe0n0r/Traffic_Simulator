@@ -1,0 +1,9 @@
+====== Best combination ======
+General operators: 4
+General queue length: 2
+Area-specific operators: 5
+
+Delay probability = 15.18%   (<= 30.00%)
+Blocking probability = 1.90% (<= 2.00%)
+Average delay = 25.62s       (<= 30.00s)
+Average total delay = 60.16s (<= 90.00s)
