@@ -50,8 +50,7 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
         }
         else { // goes to the queue
             if(*in_queue < L){
-                // TEST: Use 0.0 to confirm prediction doesn't affect system behavior
-                double predicted_wait = 0.0; // *running_avg;
+                double predicted_wait = *running_avg;
                 *prediction += predicted_wait;
                 (*delayed)++;
                 *queue = __add_queue(*queue, ev_purpose, ev_time, ev_time, predicted_wait);
@@ -89,7 +88,7 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
             *events_list = __add(*events_list, PARTIDA, q_purpose, ev_time + dur, arrival_time_G); // departure of the call now in the operator
 
             if(q_purpose == SPECIFIC)
-                *specific_list = __add(*specific_list, CHEGADA, SPECIFIC, ev_time, arrival_time_G); // goes to the specific service
+                *specific_list = __add(*specific_list, CHEGADA, SPECIFIC, ev_time, arrival_to_general); // goes to the specific service
         }
         else{ // queue is empty
             (*busy)--;
@@ -235,8 +234,7 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
 
 static EC_Metrics run_avg(double lambda, int Ng, int Ns, int L, int reps) {
     EC_Metrics acc = {0};
-    // Use fixed seed for reproducibility - change back to time(NULL) for different results
-    unsigned base = 12345; // (unsigned)time(NULL);
+    unsigned base = (unsigned)time(NULL);
 
     for (int r = 0; r < reps; r++) {
         srand(base + 1337u * (unsigned)(Ng*101 + L*997 + Ns*17 + r));
