@@ -78,7 +78,7 @@ void __print (list * pointer)
 
 // ------------------ Queue Functions ------------------
 // Função de adicionar elemento na fila (FIFO), agora inclui arrival_to_general
-queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time, double arrivals_G){
+queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time, double arrivals_G, double wait_prediction){
     queue_list* lp = pointer;
     queue_list* p_aux;
     if(pointer == NULL) {
@@ -87,6 +87,7 @@ queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time, doubl
         pointer->purpose = n_purpose;
         pointer->time = n_time;
 		pointer->arrival_to_general = arrivals_G;
+		pointer->wait_prediction = wait_prediction;
         return pointer;
     } else {
         while(pointer->next != NULL)
@@ -96,16 +97,18 @@ queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time, doubl
         p_aux->purpose = n_purpose;
         p_aux->time = n_time;
 		p_aux->arrival_to_general = arrivals_G;
+		p_aux->wait_prediction = wait_prediction;
         pointer->next = p_aux;
         return lp;
     }
 }
 
 // Função de remover elemento da fila, retorna arrival_to_general pelo ponteiro
-queue_list* __remove_queue(queue_list * pointer, int *purpose, double * arrival_S, double *arrival_G){
+queue_list* __remove_queue(queue_list * pointer, int *purpose, double * arrival_S, double *arrival_G, double *wait_prediction){
     *arrival_S = pointer->time;
 	*arrival_G = pointer->arrival_to_general;
-    *purpose      = pointer->purpose;
+    *purpose = pointer->purpose;
+	*wait_prediction = pointer->wait_prediction;
     queue_list * lp = (queue_list *)pointer -> next;
     free(pointer);
     return lp;
