@@ -86,20 +86,18 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
             *sum_abs_error += abs_error;
             *sum_rel_error += rel_error;
 
-            // --- NOVO CÓDIGO AQUI ---
             // Adiciona o erro ao 'bin' (caixa) correto do histograma
             if (histogram != NULL && bin_width > 0.0) {
                 int bin_index = (int)(abs_error / bin_width);
 
                 if (bin_index >= num_bins) {
-                    bin_index = num_bins - 1; // Coloca todos os erros > MAX no último bin
+                    bin_index = num_bins - 1; 
                 }
                 
-                if (bin_index >= 0) { // Segurança
+                if (bin_index >= 0) {
                     histogram[bin_index]++;
                 }
             }
-            // --- FIM DO NOVO CÓDIGO ---
 
             double dur = call_duration(q_purpose, GENERAL);
 
@@ -190,21 +188,17 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
 
     events_list = generate_events(lambda, 0.0, events_list); // first event
 
-    // --- NOVO CÓDIGO AQUI ---
     // Inicializa os resultados e o histograma
-    EC_Metrics results = {0}; // Inicializa todos os campos a 0/NULL
+    EC_Metrics results = {0}; 
 
     results.num_bins = NUM_BINS;
     results.bin_width = MAX_HIST_ERROR / (double)results.num_bins;
     
-    // Aloca e zera o histograma
     results.histogram = calloc(results.num_bins, sizeof(int));
     if (results.histogram == NULL) {
-        // Falha ao alocar memória, idealmente devia tratar este erro
         perror("Falha ao alocar histograma");
-        return results; // Retorna a struct zerada
+        return results; 
     }
-    // --- FIM DO NOVO CÓDIGO ---
 
     while (arrivals < num_events){
         // to check which event is the next in time
@@ -233,7 +227,7 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
         }
     }
 
-    // EC_Metrics results; // <-- APAGUE ESTA LINHA
+    // EC_Metrics results; 
     results.delay_prob = (double)delayed / arrivals * 100.0;
     results.blocking_prob = (double)blocked / arrivals * 100.0;
     results.avg_delay = (delayed > 0) ? (double)sum_delay / delayed : 0.0;
@@ -278,11 +272,9 @@ static EC_Metrics run_avg(double lambda, int Ng, int Ns, int L, int reps) {
         acc.avg_delay += m.avg_delay;
         acc.avg_total_time += m.avg_total_time;
 
-        // --- NOVO CÓDIGO AQUI ---
         // Liberta a memória do histograma desta 'run' específica.
         // A 'acc' (acumuladora) não vai guardar o histograma, apenas as médias.
         free(m.histogram);
-        // --- FIM DO NOVO CÓDIGO ---
     }
     acc.delay_prob /= reps;
     acc.blocking_prob /= reps;
@@ -339,9 +331,6 @@ int main(void){
         printf("Blocking probability = %.2f%% (<= %.2f%%)\n",   best.blocking_prob, MAX_BLOCK);
         printf("Average GP delay = %.2fs (<= %.2fs)\n",        best.avg_delay, MAX_AVG_DELAY);
         printf("Average total delay = %.2fs (<= %.2fs)\n",     best.avg_total_time, MAX_TOTAL_TIME);
-
-        // --- NOVO CÓDIGO AQUI ---
-        // Correr a simulação mais uma vez para obter o histograma da melhor combinação
         
         printf("\n====== Histogram of prediction error (abs) for one run ======\n");
         // Usamos uma seed nova para ter uma execução representativa
@@ -353,17 +342,14 @@ int main(void){
                 double bin_start = i * final_run.bin_width;
                 double bin_end = (i + 1) * final_run.bin_width;
                 
-                // Imprime a contagem de cada 'bin' (caixa)
                 printf("  [%.2fs - %.2fs]: %d calls\n", bin_start, bin_end, final_run.histogram[i]);
             }
-            
-            // Muito importante: libertar a memória do histograma desta última 'run'
             free(final_run.histogram);
         }
         else {
             printf("Error: Histogram data is not available for the final run.\n");
         }
-        // --- FIM DO NOVO CÓDIGO ---
+
     }
     else {
         printf("No combination met all the limits.\n");
