@@ -17,8 +17,10 @@
 #define MAX_AVG_DELAY 30.0
 #define MAX_TOTAL_TIME 90.0
 
-#define MAX_HIST_ERROR 60.0
-#define NUM_BINS 30 
+#define MAX_HIST_ERROR 30.0
+#define MAX_HIST_DELAY 60.0
+#define NUM_BINS 15 
+#define DELAYS_NUM_BINS 20
 
 double lambda = 0.0222;
 
@@ -32,11 +34,14 @@ typedef struct
     double avg_rel_err;
     double prediction;
     double bin_width; 
+    double bin_width_delays;
     int num_bins; 
+    int num_bins_delays;
+    int *delays_histogram;
     int *histogram; 
 } EC_Metrics;
 
-void handle_general_call(list** events_list, list** specific_list, queue_list** queue, int N_general, int L, int *busy, int *delayed, int *blocked, int *in_queue, int *out_of_queue, double *sum_delay, int ev_type, int ev_purpose, double ev_time, double ev_arrival, int arrivals, double *running_avg, double *sum_abs_error, double *sum_rel_error, double *prediction, int *histogram, int num_bins, double bin_width){
+void handle_general_call(list** events_list, list** specific_list, queue_list** queue, int N_general, int L, int *busy, int *delayed, int *blocked, int *in_queue, int *out_of_queue, double *sum_delay, int ev_type, int ev_purpose, double ev_time, double ev_arrival, int arrivals, double *running_avg, double *sum_abs_error, double *sum_rel_error, double *prediction, int *delays_histogram, double delta_delays, int *histogram, double bin_width){
     double delay = 0.0;
     double abs_error = 0.0;
     double rel_error = 0.0;
@@ -82,6 +87,11 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
             delay = ev_time - arrival_time_G;
             *sum_delay += delay;
 
+            // build the delays histogram:
+            int i = (int)(delay / delta_delays);
+            if (i >= DELAYS_NUM_BINS) i = DELAYS_NUM_BINS - 1; 
+            delays_histogram[i]++;
+
             if (*out_of_queue> 0) *running_avg = ((*running_avg * (*out_of_queue- 1)) + delay) / *out_of_queue;
             abs_error = fabs(prediction - delay);
             rel_error = (delay > 0) ? abs_error / delay : 0;
@@ -90,7 +100,7 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
 
             // build the histogram:
             int bin_index = (int)(abs_error / bin_width);
-            if (bin_index >= num_bins) bin_index = num_bins - 1; 
+            if (bin_index >= NUM_BINS) bin_index = NUM_BINS - 1; 
             histogram[bin_index]++;
             
             double dur = call_duration(q_purpose, GENERAL);
@@ -181,6 +191,11 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
     double prediction = 0.0;
 
     // ------------------- Histogram --------------------
+    double delta_delays = MAX_HIST_DELAY / (double)DELAYS_NUM_BINS;
+
+    int *delays_histogram = malloc(DELAYS_NUM_BINS * sizeof(int));
+    for (int k = 0; k < DELAYS_NUM_BINS; k++) delays_histogram[k] = 0;
+
     double delta = MAX_HIST_ERROR / (double)NUM_BINS;
 
     int *histogram = malloc(NUM_BINS * sizeof(int));
@@ -205,7 +220,7 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
 
             if(ev_type == CHEGADA) arrivals++;
 
-            handle_general_call(&events_list, &specific_list, &queue, N_general, L, &busy, &delayed, &blocked, &in_queue, &out_of_queue, &sum_delay, ev_type, ev_purpose, ev_time, ev_arrival_time, arrivals, &running_avg, &sum_abs_error, &sum_rel_error, &prediction, histogram, NUM_BINS, delta);
+            handle_general_call(&events_list, &specific_list, &queue, N_general, L, &busy, &delayed, &blocked, &in_queue, &out_of_queue, &sum_delay, ev_type, ev_purpose, ev_time, ev_arrival_time, arrivals, &running_avg, &sum_abs_error, &sum_rel_error, &prediction, delays_histogram, delta_delays, histogram, delta);
         }
         else{
             int ev_type = specific_list->type;
@@ -226,7 +241,10 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
     results.avg_rel_err = (delayed > 0) ? (double)sum_rel_error / delayed : 0.0;
     results.prediction = (double)prediction/delayed;
     results.num_bins = NUM_BINS;
+    results.num_bins_delays = DELAYS_NUM_BINS;
+    results.bin_width_delays = delta_delays;
     results.bin_width = delta;
+    results.delays_histogram = delays_histogram;
     results.histogram = histogram;
 
     return results;
@@ -255,71 +273,78 @@ int main(void){
     srand(time(NULL));
 
     // Results for every case:
-    // for(int N_general = 1; N_general < 6; N_general++){ 
-    //     for(int L = 1; L < 7; L++){ 
-    //         for(int N_specific = 1; N_specific < 6; N_specific++){
+    for(int N_general = 6; N_general < 7; N_general++){ 
+        for(int L = 4; L < 5; L++){ 
+            for(int N_specific = 5; N_specific < 6; N_specific++){
 
-    //             EC_Metrics result = call_center_system(lambda, N_general, N_specific, L);
+                EC_Metrics result = call_center_system(lambda, N_general, N_specific, L);
                 
-    //             printf("%d general operators, queue of length %d and %d area-specific operators:\n", N_general, L, N_specific); 
-    //             printf("Probability that a call is delayed : %.2f %%\n", result.delay_prob); 
-    //             printf("Probability that a call is blocked: %.2f %%\n", result.blocking_prob); 
-    //             printf("Average delay of the calls: %.2f s\n", result.avg_delay); 
-    //             printf("Average waiting prediction absolute error: %.2fs\n", result.avg_abs_err);
-    //             printf("Average waiting prediction relative error: %.2f\n", result.avg_rel_err);
-    //             printf("Histogram of prediction error:\n");
-    //             for(int i = 0; i < result.num_bins; i++){
-    //                 double low = i * result.bin_width;
-    //                 double high = low + result.bin_width;
-    //                 printf("[%.3f, %.3f[ s : %d\n", low, high, result.histogram[i]);
-    //             }
-    //             free(result.histogram);
-    //             printf("Average total time: %.2f s\n", result.avg_total_time);
-    //             printf("\n");
-    //         }
-    //     } 
-    // } 
+                printf("%d general operators, queue of length %d and %d area-specific operators:\n", N_general, L, N_specific); 
+                // printf("Probability that a call is delayed : %.2f %%\n", result.delay_prob); 
+                // printf("Probability that a call is blocked: %.2f %%\n", result.blocking_prob); 
+                // printf("Average delay of the calls: %.2f s\n", result.avg_delay); 
+                printf("Histogram of delays:\n");
+                for(int i = 0; i < result.num_bins_delays; i++){
+                    double low = i * result.bin_width_delays;
+                    double high = low + result.bin_width_delays;
+                    printf("[%.1f, %.1f[ s : %d\n", low, high, result.delays_histogram[i]);
+                }
+                free(result.histogram);
+                // printf("Average waiting prediction absolute error: %.2fs\n", result.avg_abs_err);
+                // printf("Average waiting prediction relative error: %.2f\n", result.avg_rel_err);
+                // printf("Histogram of prediction error:\n");
+                // for(int i = 0; i < result.num_bins; i++){
+                //     double low = i * result.bin_width;
+                //     double high = low + result.bin_width;
+                //     printf("[%.1f, %.1f[ s : %d\n", low, high, result.histogram[i]);
+                // }
+                // free(result.histogram);
+                // printf("Average total time: %.2f s\n", result.avg_total_time);
+                printf("\n");
+            }
+        } 
+    } 
 
     // Best case:
-    int best_Ng = -1, best_L = -1, best_Ns = -1;
-    EC_Metrics best = {0};
-    double best_score = 100;  
-    int Ng_max = 8;
-    int Ns_max = 8;
+    // int best_Ng = -1, best_L = -1, best_Ns = -1;
+    // EC_Metrics best = {0};
+    // double best_score = 100;  
+    // int Ng_max = 8;
+    // int Ns_max = 8;
 
-    for(int Ng = 1; Ng <= Ng_max; Ng++){
-        for(int Ns = 1; Ns <= Ns_max; Ns++){
-            for(int L = 1; L <= 15; L++){
+    // for(int Ng = 1; Ng <= Ng_max; Ng++){
+    //     for(int Ns = 1; Ns <= Ns_max; Ns++){
+    //         for(int L = 1; L <= 15; L++){
 
-                EC_Metrics m = run_avg(lambda, Ng, Ns, L, 3); // 5 runs
+    //             EC_Metrics m = run_avg(lambda, Ng, Ns, L, 3); // 5 runs
 
-                if (m.delay_prob <= MAX_DELAY && m.blocking_prob <= MAX_BLOCK &&  m.avg_delay <= MAX_AVG_DELAY && m.avg_total_time <= MAX_TOTAL_TIME) {
-                    // normalized score:
-                    double score = 0.2 * (m.blocking_prob / MAX_BLOCK) + 0.2 * (m.avg_delay / MAX_AVG_DELAY) + 0.1 * (m.avg_total_time / MAX_TOTAL_TIME) + 0.5 * (Ng + Ns)/(Ng_max + Ns_max); 
+    //             if (m.delay_prob <= MAX_DELAY && m.blocking_prob <= MAX_BLOCK &&  m.avg_delay <= MAX_AVG_DELAY && m.avg_total_time <= MAX_TOTAL_TIME) {
+    //                 // normalized score:
+    //                 double score = 0.2 * (m.blocking_prob / MAX_BLOCK) + 0.2 * (m.avg_delay / MAX_AVG_DELAY) + 0.1 * (m.avg_total_time / MAX_TOTAL_TIME) + 0.5 * (Ng + Ns)/(Ng_max + Ns_max); 
 
-                    if (score < best_score){
-                        best_score = score;
-                        best_Ng = Ng;
-                        best_L = L;
-                        best_Ns = Ns;
-                        best = m;
-                    }
-                }
-            }
-        }
-    }
+    //                 if (score < best_score){
+    //                     best_score = score;
+    //                     best_Ng = Ng;
+    //                     best_L = L;
+    //                     best_Ns = Ns;
+    //                     best = m;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
-    printf("====== Best combination ======\n");
-    printf("General operators: %d\n", best_Ng);
-    printf("General queue length: %d\n", best_L);
-    printf("Area-specific operators: %d\n\n", best_Ns);
+    // printf("====== Best combination ======\n");
+    // printf("General operators: %d\n", best_Ng);
+    // printf("General queue length: %d\n", best_L);
+    // printf("Area-specific operators: %d\n\n", best_Ns);
 
-    printf("Delay probability = %.2f%% (<= %.2f%%)\n",      best.delay_prob, MAX_DELAY);
-    printf("Blocking probability = %.2f%% (<= %.2f%%)\n",   best.blocking_prob, MAX_BLOCK);
-    printf("Average delay of calls = %.2fs (<= %.2fs)\n",        best.avg_delay, MAX_AVG_DELAY);
-    printf("Average total delay = %.2fs (<= %.2fs)\n",     best.avg_total_time, MAX_TOTAL_TIME);
+    // printf("Delay probability = %.2f%% (<= %.2f%%)\n",      best.delay_prob, MAX_DELAY);
+    // printf("Blocking probability = %.2f%% (<= %.2f%%)\n",   best.blocking_prob, MAX_BLOCK);
+    // printf("Average delay of calls = %.2fs (<= %.2fs)\n",        best.avg_delay, MAX_AVG_DELAY);
+    // printf("Average total delay = %.2fs (<= %.2fs)\n",     best.avg_total_time, MAX_TOTAL_TIME);
     
 
-    return 0;
+    // return 0;
 }
 
