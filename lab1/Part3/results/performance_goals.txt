@@ -3,7 +3,7 @@ General operators: 4
 General queue length: 2
 Area-specific operators: 5
 
-Delay probability = 15.18%   (<= 30.00%)
-Blocking probability = 1.90% (<= 2.00%)
-Average delay = 25.62s       (<= 30.00s)
-Average total delay = 60.16s (<= 90.00s)
+Delay probability = 14.71% (<= 30.00%)
+Blocking probability = 1.88% (<= 2.00%)
+Average GP delay = 25.61s (<= 30.00s)
+Average total delay = 85.80s (<= 90.00s)
