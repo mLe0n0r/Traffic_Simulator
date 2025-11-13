@@ -19,7 +19,7 @@ list* generate_events(double lambda, double event_time, list *list)
 
     int enc_purpose = is_generic_only;
 
-    list = __add(list, CHEGADA, enc_purpose, c + event_time, 0); // we are generating an arrival so it doesnt have a time in general yet
+    list = __add(list, CHEGADA, enc_purpose, c + event_time, c + event_time); // we are generating an arrival so it doesnt have a time in general yet
 
     return list;
 }

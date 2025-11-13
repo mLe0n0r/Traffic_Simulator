@@ -10,7 +10,7 @@
 #define PARTIDA    1
 #define GENERAL    0
 #define SPECIFIC   1
-#define num_events 10000
+#define num_events 20000
 
 #define MAX_DELAY 30.0
 #define MAX_BLOCK 2.0
@@ -33,15 +33,16 @@ typedef struct
     int *histogram; 
 } EC_Metrics;
 
-void handle_general_call(list** events_list, list** specific_list, queue_list** queue, int N_general, int L, int *busy, int *delayed, int *blocked, int *in_queue, int *out_of_queue, double *sum_delay, int ev_type, int ev_purpose, double ev_time, int arrivals, double *running_avg, double *sum_abs_error, double *sum_rel_error, double *prediction){
-    static double arrival_to_general = 0.0; 
+void handle_general_call(list** events_list, list** specific_list, queue_list** queue, int N_general, int L, int *busy, int *delayed, int *blocked, int *in_queue, int *out_of_queue, double *sum_delay, int ev_type, int ev_purpose, double ev_time, double ev_arrival, int arrivals, double *running_avg, double *sum_abs_error, double *sum_rel_error, double *prediction){
     double delay = 0.0;
     double abs_error = 0.0;
     double rel_error = 0.0;
+    double arrival_to_general;  // Will hold the correct arrival time to general
 
     if(ev_type == CHEGADA){
-        arrival_to_general = ev_time; 
-
+        // For arrivals, the arrival time to general IS the current event time
+        arrival_to_general = ev_time;
+        
         if(*busy < N_general) { // call is immediately answered
             (*busy)++;
             double dur = call_duration(ev_purpose, GENERAL);
@@ -53,16 +54,19 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
                 double predicted_wait = *running_avg;
                 *prediction += predicted_wait;
                 (*delayed)++;
-                *queue = __add_queue(*queue, ev_purpose, ev_time, ev_time, predicted_wait);
+                *queue = __add_queue(*queue, ev_purpose, ev_time, arrival_to_general, predicted_wait);
                 (*in_queue)++;
             }
             else (*blocked)++;
         }
 
-        *events_list = generate_events(lambda, ev_time, *events_list); // next arrival
+        if(arrivals < num_events) *events_list = generate_events(lambda, ev_time, *events_list); // next arrival
     }
     else // departure
     {
+        // For departures, use the arrival time that was stored in the event
+        arrival_to_general = ev_arrival;
+        
         double arrival_time_G;
         double arrival_time_S;
         int q_purpose;
@@ -88,25 +92,25 @@ void handle_general_call(list** events_list, list** specific_list, queue_list** 
             *events_list = __add(*events_list, PARTIDA, q_purpose, ev_time + dur, arrival_time_G); // departure of the call now in the operator
 
             if(q_purpose == SPECIFIC)
-                *specific_list = __add(*specific_list, CHEGADA, SPECIFIC, ev_time, arrival_to_general); // goes to the specific service
+                *specific_list = __add(*specific_list, CHEGADA, SPECIFIC, ev_time, arrival_time_G); // goes to the specific service
         }
         else{ // queue is empty
             (*busy)--;
 
-            if(ev_purpose == SPECIFIC) *specific_list = __add(*specific_list, CHEGADA, SPECIFIC, ev_time, arrival_to_general); // goes to the specific service
+            if(ev_purpose == SPECIFIC) *specific_list = __add(*specific_list, CHEGADA, SPECIFIC, ev_time, arrival_to_general); // uses arrival time from departure event
         }
     }
 }
 
 void handle_specific_call(list **events_specific, queue_list **queue_specific, int N_specific, int *busy_specific, int *delayed_specific, int *in_queue_specific, double arrival_G, double *sum_total_time, int ev_type, double ev_time, int *specific_calls){
-
+    
     if(ev_type == CHEGADA){
         if (*busy_specific < N_specific) { // call is immediately processed
             (*busy_specific)++;
 
             double total_time = ev_time - arrival_G;
             *sum_total_time += total_time;
-            (*specific_calls)++;  // count only when we add to sum_total_time
+            (*specific_calls)++;
 
             double durS = call_duration(SPECIFIC, SPECIFIC);
             *events_specific = __add(*events_specific, PARTIDA, SPECIFIC, ev_time + durS, arrival_G);
@@ -129,7 +133,7 @@ void handle_specific_call(list **events_specific, queue_list **queue_specific, i
 
             double total_time = ev_time - arrival_G_queue;
             *sum_total_time += total_time;
-            (*specific_calls)++;  // count only when we add to sum_total_time
+            (*specific_calls)++;
 
             double durS = call_duration(SPECIFIC, SPECIFIC);
             *events_specific = __add(*events_specific, PARTIDA, SPECIFIC, ev_time + durS, arrival_G_queue);
@@ -168,11 +172,11 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
     double running_avg = 0.0;
     double sum_abs_error = 0.0;
     double sum_rel_error = 0.0;
-    double prediction;
+    double prediction = 0.0;
 
     events_list = generate_events(lambda, 0.0, events_list); // first event
 
-    while (arrivals < num_events){
+    while (arrivals < num_events || events_list != NULL || specific_list != NULL){
         // to check which event is the next in time
         double nextG = events_list ? events_list->time : 1e18;
         double nextS = specific_list ? specific_list->time : 1e18;
@@ -181,24 +185,24 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
             int ev_type = events_list->type;
             int ev_purpose = events_list->purpose;
             double ev_time = events_list->time;
+            double ev_arrival_time = events_list->arrival;
 
             events_list = __remove(events_list);
 
             if(ev_type == CHEGADA) arrivals++;
 
-            handle_general_call(&events_list, &specific_list, &queue, N_general, L, &busy, &delayed, &blocked, &in_queue, &out_of_queue, &sum_delay, ev_type, ev_purpose, ev_time, arrivals, &running_avg, &sum_abs_error, &sum_rel_error, &prediction);
+            handle_general_call(&events_list, &specific_list, &queue, N_general, L, &busy, &delayed, &blocked, &in_queue, &out_of_queue, &sum_delay, ev_type, ev_purpose, ev_time, ev_arrival_time, arrivals, &running_avg, &sum_abs_error, &sum_rel_error, &prediction);
         }
         else{
             int ev_type = specific_list->type;
             double ev_time = specific_list->time;
-            double arrival_GP = specific_list->delay; 
+            double arrival_GP = specific_list->arrival; 
 
             specific_list = __remove(specific_list);
 
             handle_specific_call(&specific_list, &queue_specific, N_specific, &busy_specific, &delayed_specific, &in_queue_specific, arrival_GP, &sum_total_time, ev_type, ev_time, &specific_calls);
         }
     }
-
     EC_Metrics results;
     results.delay_prob = (double)delayed / arrivals * 100.0;
     results.blocking_prob = (double)blocked / arrivals * 100.0;
@@ -214,8 +218,8 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
 // int main(void){ 
 //     srand(time(NULL)); 
     
-//     for(int N_general = 1; N_general < 3; N_general++){ 
-//         for(int L = 1; L < 15; L++){ 
+//     for(int N_general = 1; N_general < 6; N_general++){ 
+//         for(int L = 1; L < 7; L++){ 
 //             for(int N_specific = 1; N_specific < 6; N_specific++){
 //                 EC_Metrics result = call_center_system(lambda, N_general, N_specific, L); 
 //                 printf("%d general operators, queue of length %d and %d area-specific operators:\n", N_general, L, N_specific); 
@@ -252,11 +256,11 @@ static EC_Metrics run_avg(double lambda, int Ng, int Ns, int L, int reps) {
 }
 
 int main(void){
-    srand(time(NULL));
+   srand(time(NULL));
 
-    int best_Ng = -1, best_L = -1, best_Ns = -1;
-    EC_Metrics best = {0};
-    double best_score = -1.0;   // agora procuramos o MAIOR score
+   int best_Ng = -1, best_L = -1, best_Ns = -1;
+   EC_Metrics best = {0};
+   double best_score = -1.0;   // agora procuramos o MAIOR score
 
     for(int Ng = 1; Ng <= 6; Ng++){
         for(int Ns = 1; Ns <= 6; Ns++){
