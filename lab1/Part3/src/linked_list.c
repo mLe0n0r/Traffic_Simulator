@@ -11,7 +11,7 @@ list * __remove (list * pointer)
 }
 
 // Function that adds a new element to the list, sorting the list in chronological order
-list * __add (list * pointer, int n_type, int n_purpose, double n_time, double n_duration)
+list * __add (list * pointer, int n_type, int n_purpose, double n_time, double n_arrival)
 {
 	list * lp = pointer;
 	list * p_aux, * p_next;
@@ -22,7 +22,7 @@ list * __add (list * pointer, int n_type, int n_purpose, double n_time, double n
 		pointer -> type = n_type;
 		pointer -> purpose = n_purpose;
 		pointer -> time = n_time;
-		pointer -> delay = n_duration;
+		pointer -> arrival = n_arrival;
 		return pointer;
 	}
 	else
@@ -32,7 +32,7 @@ list * __add (list * pointer, int n_type, int n_purpose, double n_time, double n
 	        p_aux -> type = n_type;
 			p_aux -> purpose = n_purpose;
             p_aux -> time = n_time;
-			p_aux -> delay = n_duration;
+			p_aux -> arrival = n_arrival;
             p_aux -> next = (struct list *) pointer;
             return p_aux;
 	    }
@@ -56,7 +56,7 @@ list * __add (list * pointer, int n_type, int n_purpose, double n_time, double n
 		pointer -> type = n_type;
 		pointer -> purpose = n_purpose;
 		pointer -> time = n_time;
-		pointer -> delay = n_duration;
+		pointer -> arrival = n_arrival;
 		return lp;
 	}
 }

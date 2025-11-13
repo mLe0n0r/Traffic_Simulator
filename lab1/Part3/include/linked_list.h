@@ -9,7 +9,7 @@ typedef struct list {
     int type;
     int purpose;
     double time;
-    double delay;
+    double arrival;
     struct list* next;
 } list;
 
@@ -23,7 +23,7 @@ typedef struct queue_list {
 
 // Function prototypes
 list* __remove(list* pointer);
-list* __add(list * pointer, int n_type, int n_purpose, double n_time, double n_duration);
+list* __add(list * pointer, int n_type, int n_purpose, double n_time, double n_arrival);
 void __print(list* pointer);
 
 queue_list* __add_queue(queue_list* pointer, int n_purpose, double n_time, double n_arrival_G, double wait_prediction);
