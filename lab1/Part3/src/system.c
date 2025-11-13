@@ -260,7 +260,7 @@ int main(void){
 
    int best_Ng = -1, best_L = -1, best_Ns = -1;
    EC_Metrics best = {0};
-   double best_score = -1.0;   // agora procuramos o MAIOR score
+   double best_score = -1.0;  
 
     for(int Ng = 1; Ng <= 6; Ng++){
         for(int Ns = 1; Ns <= 6; Ns++){
@@ -268,13 +268,11 @@ int main(void){
 
                 EC_Metrics m = run_avg(lambda, Ng, Ns, L, 5); // 5 runs
 
-                // Verificar limites
                 if (m.delay_prob    <= MAX_DELAY &&
                     m.blocking_prob <= MAX_BLOCK &&
                     m.avg_delay     <= MAX_AVG_DELAY &&
                     m.avg_total_time<= MAX_TOTAL_TIME)
                 {
-                    // score = quão perto estamos dos limites sem ultrapassar
                     double score =
                         (m.delay_prob    / MAX_DELAY) +
                         (m.blocking_prob / MAX_BLOCK) +
