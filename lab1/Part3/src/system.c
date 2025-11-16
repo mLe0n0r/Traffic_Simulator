@@ -10,19 +10,17 @@
 #define PARTIDA    1
 #define GENERAL    0
 #define SPECIFIC   1
-#define num_events 10000
+#define num_events 100000
 
-#define MAX_DELAY 30.0
-#define MAX_BLOCK 2.0
-#define MAX_AVG_DELAY 30.0
-#define MAX_TOTAL_TIME 90.0
+#define MAX_DELAY       30.0
+#define MAX_BLOCK       2.0
+#define MAX_AVG_DELAY   30.0
+#define MAX_TOTAL_TIME  90.0
 
-#define MAX_HIST_ERROR 30.0
-#define MAX_HIST_DELAY 60.0
-#define NUM_BINS 15 
+#define MAX_HIST_ERROR  60.0
+#define MAX_HIST_DELAY  60.0
+#define NUM_BINS        20 
 #define DELAYS_NUM_BINS 20
-
-double lambda = 0.0222;
 
 typedef struct
 {
@@ -32,7 +30,6 @@ typedef struct
     double avg_total_time;
     double avg_abs_err;
     double avg_rel_err;
-    double prediction;
     double bin_width; 
     double bin_width_delays;
     int num_bins; 
@@ -41,7 +38,7 @@ typedef struct
     int *histogram; 
 } EC_Metrics;
 
-void handle_general_call(list** events_list, list** specific_list, queue_list** queue, int N_general, int L, int *busy, int *delayed, int *blocked, int *in_queue, int *out_of_queue, double *sum_delay, int ev_type, int ev_purpose, double ev_time, double ev_arrival, int arrivals, double *running_avg, double *sum_abs_error, double *sum_rel_error, double *prediction, int *delays_histogram, double delta_delays, int *histogram, double bin_width){
+void handle_general_call(double lambda, list** events_list, list** specific_list, queue_list** queue, int N_general, int L, int *busy, int *delayed, int *blocked, int *in_queue, int *out_of_queue, double *sum_delay, int ev_type, int ev_purpose, double ev_time, double ev_arrival, int arrivals, double *running_avg, double *sum_abs_error, double *sum_rel_error, double *prediction, int *delays_histogram, double delta_delays, int *histogram, double bin_width){
     double delay = 0.0;
     double abs_error = 0.0;
     double rel_error = 0.0;
@@ -220,7 +217,7 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
 
             if(ev_type == CHEGADA) arrivals++;
 
-            handle_general_call(&events_list, &specific_list, &queue, N_general, L, &busy, &delayed, &blocked, &in_queue, &out_of_queue, &sum_delay, ev_type, ev_purpose, ev_time, ev_arrival_time, arrivals, &running_avg, &sum_abs_error, &sum_rel_error, &prediction, delays_histogram, delta_delays, histogram, delta);
+            handle_general_call(lambda, &events_list, &specific_list, &queue, N_general, L, &busy, &delayed, &blocked, &in_queue, &out_of_queue, &sum_delay, ev_type, ev_purpose, ev_time, ev_arrival_time, arrivals, &running_avg, &sum_abs_error, &sum_rel_error, &prediction, delays_histogram, delta_delays, histogram, delta);
         }
         else{
             int ev_type = specific_list->type;
@@ -232,14 +229,17 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
             handle_specific_call(&specific_list, &queue_specific, N_specific, &busy_specific, &delayed_specific, &in_queue_specific, arrival_GP, &sum_total_time, ev_type, ev_time, &specific_calls);
         }
     }
+
     EC_Metrics results;
+
     results.delay_prob = (double)delayed / arrivals * 100.0;
     results.blocking_prob = (double)blocked / arrivals * 100.0;
     results.avg_delay = (delayed > 0) ? (double)sum_delay / delayed : 0.0;
     results.avg_total_time = (specific_calls > 0) ? (double)sum_total_time / specific_calls : 0.0;
+
     results.avg_abs_err = (delayed > 0) ? (double)sum_abs_error / delayed : 0.0;
     results.avg_rel_err = (delayed > 0) ? (double)sum_rel_error / delayed : 0.0;
-    results.prediction = (double)prediction/delayed;
+
     results.num_bins = NUM_BINS;
     results.num_bins_delays = DELAYS_NUM_BINS;
     results.bin_width_delays = delta_delays;
@@ -252,10 +252,8 @@ EC_Metrics call_center_system(double lambda, int N_general, int N_specific, int 
 
 static EC_Metrics run_avg(double lambda, int Ng, int Ns, int L, int reps) {
     EC_Metrics acc = {0};
-    unsigned base = (unsigned)time(NULL);
 
     for (int r = 0; r < reps; r++) {
-        srand(base + 1337u * (unsigned)(Ng*101 + L*997 + Ns*17 + r));
         EC_Metrics m = call_center_system(lambda, Ng, Ns, L);
         acc.delay_prob += m.delay_prob;
         acc.blocking_prob += m.blocking_prob;
@@ -272,10 +270,11 @@ static EC_Metrics run_avg(double lambda, int Ng, int Ns, int L, int reps) {
 int main(void){
     srand(time(NULL));
 
-    // Results for every case:
-    // for(int N_general = 2; N_general < 3; N_general++){ 
-    //     for(int L = 1; L < 2; L++){ 
-    //         for(int N_specific = 3; N_specific < 4; N_specific++){
+    // =========== Results for every case: ===========
+    // double lambda = 0.0222;
+    // for(int N_general = 4; N_general < 5; N_general++){ 
+    //     for(int L = 2; L < 3; L++){ 
+    //         for(int N_specific = 5; N_specific < 6; N_specific++){
 
     //             EC_Metrics result = call_center_system(lambda, N_general, N_specific, L);
                 
@@ -289,7 +288,7 @@ int main(void){
     //                 double high = low + result.bin_width_delays;
     //                 printf("[%.1f, %.1f[ s : %d\n", low, high, result.delays_histogram[i]);
     //             }
-    //             free(result.histogram);
+    //             free(result.delays_histogram);
     //             printf("Average waiting prediction absolute error: %.2fs\n", result.avg_abs_err);
     //             printf("Average waiting prediction relative error: %.2f\n", result.avg_rel_err);
     //             printf("Histogram of prediction error:\n");
@@ -298,53 +297,100 @@ int main(void){
     //                 double high = low + result.bin_width;
     //                 printf("[%.1f, %.1f[ s : %d\n", low, high, result.histogram[i]);
     //             }
-    //             free(result.histogram);
     //             printf("Average total time: %.2f s\n", result.avg_total_time);
+    //             free(result.histogram);
     //             printf("\n");
     //         }
     //     } 
     // } 
 
-    // Best case:
-    int best_Ng = -1, best_L = -1, best_Ns = -1;
-    EC_Metrics best = {0};
-    double best_score = 100;  
-    int Ng_max = 8;
-    int Ns_max = 8;
+    // =========== Best case: ===========
+    // double lambda = 0.0222;
+    // int best_Ng = -1, best_L = -1, best_Ns = -1;
+    // EC_Metrics best = {0};
+    // double best_score = 100;  
+    // int Ng_max = 6;
+    // int Ns_max = 6;
 
-    for(int Ng = 1; Ng <= Ng_max; Ng++){
-        for(int Ns = 1; Ns <= Ns_max; Ns++){
-            for(int L = 1; L <= 15; L++){
+    // for(int Ng = 1; Ng <= Ng_max; Ng++){
+    //     for(int Ns = 1; Ns <= Ns_max; Ns++){
+    //         for(int L = 1; L <= 10; L++){
 
-                EC_Metrics m = run_avg(lambda, Ng, Ns, L, 3); // 5 runs
+    //             EC_Metrics m = call_center_system(lambda, Ng, Ns, L);
 
-                if (m.delay_prob <= MAX_DELAY && m.blocking_prob <= MAX_BLOCK &&  m.avg_delay <= MAX_AVG_DELAY && m.avg_total_time <= MAX_TOTAL_TIME) {
-                    // normalized score:
-                    double score = 0.2 * (m.blocking_prob / MAX_BLOCK) + 0.2 * (m.avg_delay / MAX_AVG_DELAY) + 0.1 * (m.avg_total_time / MAX_TOTAL_TIME) + 0.5 * (Ng + Ns)/(Ng_max + Ns_max); 
+    //             if (m.delay_prob <= MAX_DELAY && 
+    //                 m.blocking_prob <= MAX_BLOCK &&  
+    //                 m.avg_delay <= MAX_AVG_DELAY && 
+    //                 m.avg_total_time <= MAX_TOTAL_TIME) 
+    //             {
+    //                 double score = 
+    //                     0.2 * (m.blocking_prob / MAX_BLOCK) +
+    //                     0.2 * (m.avg_delay / MAX_AVG_DELAY) +
+    //                     0.2 * (m.avg_total_time / MAX_TOTAL_TIME) +
+    //                     0.4 * (Ng + Ns)/(Ng_max + Ns_max);
 
-                    if (score < best_score){
-                        best_score = score;
-                        best_Ng = Ng;
-                        best_L = L;
-                        best_Ns = Ns;
-                        best = m;
-                    }
-                }
-            }
-        }
-    }
+    //                 if (score < best_score){
+    //                     best_score = score;
+    //                     best_Ng = Ng;
+    //                     best_L = L;
+    //                     best_Ns = Ns;
+    //                     best = m;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
-    printf("====== Best combination ======\n");
-    printf("General operators: %d\n", best_Ng);
-    printf("General queue length: %d\n", best_L);
-    printf("Area-specific operators: %d\n\n", best_Ns);
 
-    printf("Delay probability = %.2f%% (<= %.2f%%)\n",      best.delay_prob, MAX_DELAY);
-    printf("Blocking probability = %.2f%% (<= %.2f%%)\n",   best.blocking_prob, MAX_BLOCK);
-    printf("Average delay of calls = %.2fs (<= %.2fs)\n",        best.avg_delay, MAX_AVG_DELAY);
-    printf("Average total delay = %.2fs (<= %.2fs)\n",     best.avg_total_time, MAX_TOTAL_TIME);
+    // printf("====== Best combination ======\n");
+    // printf("General operators: %d\n", best_Ng);
+    // printf("General queue length: %d\n", best_L);
+    // printf("Area-specific operators: %d\n\n", best_Ns);
+
+    // printf("Delay probability = %.2f%% (<= %.2f%%)\n",      best.delay_prob, MAX_DELAY);
+    // printf("Blocking probability = %.2f%% (<= %.2f%%)\n",   best.blocking_prob, MAX_BLOCK);
+    // printf("Average delay of calls = %.2fs (<= %.2fs)\n",        best.avg_delay, MAX_AVG_DELAY);
+    // printf("Average total delay = %.2fs (<= %.2fs)\n",     best.avg_total_time, MAX_TOTAL_TIME);
     
 
-    return 0;
+    // return 0;
+
+    // Sensitivity analysis:
+    int repetitions = 30;
+    double results[1000];
+    double sum = 0.0, mean, variance = 0.0, std_deviation, std_error; 
+    double z = 1.645;
+
+    for(int i = 0; i < repetitions; i++){
+        double lambda = 0.0222;
+        results[i] = call_center_system(lambda, 6, 6, 2).avg_total_time;
+        sum += results[i];
+    }
+
+    mean = sum / repetitions;
+
+    for (int i = 0; i < repetitions; i++) {
+        variance += pow(results[i] - mean, 2);
+    }
+    variance /= (repetitions - 1);
+    std_deviation = sqrt(variance);
+
+    std_error = std_deviation / sqrt(repetitions);
+
+    // confidence interval
+    double lower = mean - z * std_error;
+    double upper = mean + z * std_error;
+
+    printf("Average total delay: %.2f s\n", mean);
+    printf("Standard deviation: %.2f s\n", std_deviation);
+    printf("90%% CI: [%.2f , %.2f] s\n", lower, upper);
+    printf("\n");
+
+    for(int l = 10; l < 160; l += 10){
+        double lambda = l / 3600.0;
+        srand(time(NULL));
+        double r = run_avg(lambda, 6, 6, 2, 30).avg_total_time;
+        printf("Lambda = %d calls/hour -> %.2fs\n", l, r);
+    }
 }
 
