@@ -1,0 +1,19 @@
+Average total delay: 70.35 s
+Standard deviation: 0.46 s
+90% CI: [70.21 , 70.49] s
+
+Lambda = 10 calls/hour -> 62.69s
+Lambda = 20 calls/hour -> 62.70s
+Lambda = 30 calls/hour -> 62.74s
+Lambda = 40 calls/hour -> 62.93s
+Lambda = 50 calls/hour -> 63.46s
+Lambda = 60 calls/hour -> 64.59s
+Lambda = 70 calls/hour -> 66.71s
+Lambda = 80 calls/hour -> 70.38s
+Lambda = 90 calls/hour -> 76.63s
+Lambda = 100 calls/hour -> 86.66s
+Lambda = 110 calls/hour -> 104.36s
+Lambda = 120 calls/hour -> 134.24s
+Lambda = 130 calls/hour -> 201.96s
+Lambda = 140 calls/hour -> 385.72s
+Lambda = 150 calls/hour -> 2814.54s

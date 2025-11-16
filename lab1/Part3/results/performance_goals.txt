@@ -3,18 +3,17 @@ General operators: 4
 General queue length: 2
 Area-specific operators: 5
 
-Delay probability = 14.71%      (<= 30.00%)
-Blocking probability = 1.88%    (<= 2.00%)
-Average delay of calls = 25.61s (<= 30.00s)
-Average total delay = 85.80s    (<= 90.00s)
-
+Delay probability = 15.28%      (<= 30.00%)
+Blocking probability = 1.98%    (<= 2.00%)
+Average delay of calls = 26.21s (<= 30.00s)
+Average total delay = 88.57s    (<= 90.00s)
 
 ====== Best combination ======
 General operators: 6
-General queue length: 4
-Area-specific operators: 5
+General queue length: 2
+Area-specific operators: 6
 
-Delay probability = 1.84%       (<= 30.00%)
-Blocking probability = 0.00%    (<= 2.00%)
-Average delay of calls = 16.30s (<= 30.00s)
-Average total delay = 88.35s    (<= 90.00s)
+Delay probability = 1.72% (<= 30.00%)
+Blocking probability = 0.11% (<= 2.00%)
+Average delay of calls = 15.76s (<= 30.00s)
+Average total delay = 70.34s (<= 90.00s)
