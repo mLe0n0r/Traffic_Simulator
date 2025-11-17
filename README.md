@@ -5,6 +5,7 @@ This repository provides a discrete-event simulation of a call-centre system dev
 
 ## 📁 Folder Structure
 
+```
 lab1/
  └─ Part1/
      ├─ build/          → recommended folder to compile and store executables
@@ -25,15 +26,18 @@ lab1/
      ├─ plots/          → graphs created from the results obtained 
      ├─ Results/        → results obtained during simulation (.txt)
      └─ src/            → source files (.c): system.c, duration_of_calls.c, linked_list.c, generate_arrivals.c    
+```
 
 ---
 
 ## ▶️ How to Compile
+
+```
 
 cd Lab2/Part3/build
 
 gcc -I../include ../src/system.c ../src/linked_list.c ../src/generate_arrivals.c ../src/duration_of_calls.c -o system.exe -lm
 
 ./system.exe
-
+```
 
