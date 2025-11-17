@@ -1,7 +1,7 @@
 ## Traffic Simulator
-```
+
 This repository provides a discrete-event simulation of a call-centre system developed in the context of the Telecommunications Networks course. The system models two interacting subsystems: a general-purpose answering subsystem, with a finite waiting queue, and an area-specific answering subsystem, which operates with an infinite queue. The simulation allows the configuration of the number of operators, both general-purpose and area-specific, as well as the length of the general-purpose queue.
-```
+
 
 ## 📁 Folder Structure
 
