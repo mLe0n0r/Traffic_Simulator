@@ -33,8 +33,7 @@ lab1/
 ## ▶️ How to Compile
 
 ```
-
-cd Lab2/Part3/build
+cd Lab1/Part3/build
 
 gcc -I../include ../src/system.c ../src/linked_list.c ../src/generate_arrivals.c ../src/duration_of_calls.c -o system.exe -lm
 
