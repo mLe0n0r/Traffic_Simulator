@@ -19,7 +19,7 @@ lab1/
      ├─ plots/          → graphs created from the results obtained for a better visualization
      └─ src/            → source files (.c): Lab2a.c, Lab2b.c, Lab2c.c, linked-list.c, generate_events.c
 
- └─ Part3/              **→ final implementation of the system**
+ └─ Part3/              → final implementation of the system
      ├─ build/
      ├─ diagrams/       → flow diagrams
      ├─ include/        → header files (.h)
