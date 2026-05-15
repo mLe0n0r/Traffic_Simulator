@@ -1,6 +1,42 @@
-## Traffic Simulator
+# Traffic Simulator
 
-This repository provides a discrete-event simulation of a call-centre system developed in the context of the Telecommunications Networks course. The system models two interacting subsystems: a general-purpose answering subsystem, with a finite waiting queue, and an area-specific answering subsystem, which operates with an infinite queue. The simulation allows the configuration of the number of operators, both general-purpose and area-specific, as well as the length of the general-purpose queue.
+This repository contains a C-based discrete-event traffic simulator developed for the Telecommunications Networks course. The project progressively models Poisson arrivals, packet-oriented queueing systems, and a call-centre scenario, estimating performance metrics such as blocking probability, delay probability, average waiting time, loss probability, and prediction error.
+
+## Overview
+
+The work is divided into three parts:
+
+### Part 1 — Poisson Arrival Process
+
+Simulates a traffic source with Poisson arrivals using two approaches:
+
+- Event-driven simulation, where the clock advances directly to the next arrival;
+- Time-stepped simulation, where arrivals are generated over fixed time intervals using λΔt.
+
+The simulated inter-arrival times are compared with the expected exponential distribution.
+
+### Part 2 — Packet-Oriented Traffic Systems
+
+Extends the simulator to packet-oriented systems with multiple service channels, covering:
+
+- Erlang-B loss system;
+- Erlang-C waiting system with an infinite FIFO queue;
+- Finite-queue waiting system.
+
+The simulator estimates blocking probability, delay probability, average delay, delay distributions, and queue length requirements for a target loss probability.
+
+### Part 3 — Call-Centre System
+
+Simulates a telecom operator call centre during peak-hour traffic, with calls arriving according to a Poisson process at 80 calls/hour.
+
+The model includes two interacting subsystems:
+
+- A general-purpose answering system with a finite FIFO queue;
+- An area-specific answering system with an infinite FIFO queue.
+
+Calls may be handled entirely by a general operator or transferred to a specialised operator. Different numbers of operators and queue lengths can be tested to evaluate delay probability, blocking probability, average delay, total system time, and waiting-time prediction accuracy.
+
+For queued calls, the simulator estimates the expected waiting time using previously observed waiting times and compares the prediction with the actual waiting time to compute absolute and relative prediction errors.
 
 
 ## 📁 Folder Structure
@@ -39,4 +75,3 @@ gcc -I../include ../src/system.c ../src/linked_list.c ../src/generate_arrivals.c
 
 ./system.exe
 ```
-
